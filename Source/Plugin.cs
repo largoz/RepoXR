@@ -22,7 +22,7 @@ public class Plugin : BaseUnityPlugin
     public const string PLUGIN_NAME = "RepoXR";
     public const string PLUGIN_VERSION = "1.2.3";
 
-    public const string SUPPORTED_GAME_VERSION = "v0.5.0";
+    public const string SUPPORTED_GAME_VERSION = "v0.5.2";
 
     /// <summary>
     /// The standalone Quest build (repo-quest-vr): some features need its shaders and build tools (lamp lighting, level
@@ -65,12 +65,16 @@ public class Plugin : BaseUnityPlugin
         if (!PreloadRuntimeDependencies())
         {
             Logger.LogError("Disabling mod because required runtime dependencies could not be loaded!");
+            if (PatchCheck.Enabled)
+                PatchCheck.Finish("runtime dependencies could not be loaded");
             return;
         }
 
         if (!AssetCollection.LoadAssets())
         {
             Logger.LogError("Disabling mod because assets could not be loaded!");
+            if (PatchCheck.Enabled)
+                PatchCheck.Finish("assets could not be loaded");
             return;
         }
 
@@ -79,6 +83,16 @@ public class Plugin : BaseUnityPlugin
 
         HarmonyPatcher.PatchUniversal();
         HarmonyPatcher.PatchNetworkRPCs();
+
+        // Without a headset the VR patches are never applied; the patch check applies them anyway, reports, and quits
+        if (PatchCheck.Enabled)
+        {
+            if (!Flags.HasFlag(Flags.VR))
+                HarmonyPatcher.PatchVR();
+
+            PatchCheck.Finish();
+            return;
+        }
 
         Logger.LogDebug("Inserted universal patches using Harmony");
 

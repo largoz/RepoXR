@@ -415,6 +415,10 @@ internal static class InputPatches
     // by position: R.E.P.O. 0.5.0 renamed the parameters (_action, _index)
     private static bool InputDisplayGetString(InputAction __0, int __1, ref string __result)
     {
+        // An action without a VR binding at this index (seen on 0.5.2 before the VR actions exist): the game's own glyph
+        if (__0 == null || __1 < 0 || __1 >= __0.bindings.Count)
+            return true;
+
         var binding = __0.bindings[__1].effectivePath;
         __result = Utils.GetControlSpriteString(binding);
 

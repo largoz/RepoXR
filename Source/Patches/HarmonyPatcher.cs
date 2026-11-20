@@ -20,7 +20,8 @@ internal static class HarmonyPatcher
     private static readonly Harmony VRPatcher = new("io.daxcess.repoxr");
     private static readonly Harmony UniversalPatcher = new("io.daxcess.repoxr-universal");
 
-    private static bool ignoreErrors;
+    // The patch check reports failures instead of asking
+    private static bool ignoreErrors = PatchCheck.Enabled;
 
     public static void PatchUniversal()
     {
@@ -58,10 +59,12 @@ internal static class HarmonyPatcher
                 Logger.LogDebug($"Applying patches from: {type.FullName}");
 
                 patcher.CreateClassProcessor(type, true).Patch();
+                PatchCheck.RecordApplied(type);
             }
             catch (Exception e)
             {
                 Logger.LogError($"Failed to apply patches from {type}: {e.Message}, {e.InnerException}");
+                PatchCheck.RecordFailed(type, e);
 
                 if (ignoreErrors)
                     return;

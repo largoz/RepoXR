@@ -8,7 +8,7 @@ internal static class PostProcessingPatches
     /// <summary>
     /// Disable certain post-processing effects that do not work well with VR
     /// </summary>
-    [HarmonyPatch(typeof(PostProcessing), nameof(PostProcessing.Start))]
+    [HarmonyPatch(typeof(PostProcessing), nameof(PostProcessing.Awake))]
     [HarmonyPostfix]
     private static void PostProcessingPatch(PostProcessing __instance)
     {
